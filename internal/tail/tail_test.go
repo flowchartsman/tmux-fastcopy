@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -44,7 +43,7 @@ func TestTee(t *testing.T) {
 	clock := clock.NewMock()
 
 	var buff lockedBuffer
-	r, err := ioutil.TempFile(t.TempDir(), "file")
+	r, err := os.CreateTemp(t.TempDir(), "file")
 	require.NoError(t, err)
 
 	tee := Tee{
@@ -99,7 +98,7 @@ func TestTeeError(t *testing.T) {
 	r := iotest.ErrReader(errors.New("great sadness"))
 	tee := Tee{
 		W: &buff,
-		R: ioutil.NopCloser(r),
+		R: io.NopCloser(r),
 	}
 	tee.Start()
 
@@ -114,7 +113,7 @@ func TestTeeClosed(t *testing.T) {
 	var buff lockedBuffer
 	defer func() { assert.Empty(t, buff.String()) }()
 
-	r, err := ioutil.TempFile(t.TempDir(), "file")
+	r, err := os.CreateTemp(t.TempDir(), "file")
 	require.NoError(t, err)
 
 	tee := Tee{
